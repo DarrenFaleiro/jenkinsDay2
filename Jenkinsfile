@@ -16,10 +16,31 @@ pipeline {
             }
         }
 
+        stage('Trivy FS Scan') {
+            steps {
+                sh '''
+                    trivy fs . \
+                        --format json \
+                        --output trivy-fs-report.json
+                '''
+            }
+        }
+
         stage('Build Image') {
             steps {
                 sh '''
                     docker build -t ${IMAGE_NAME}:latest .
+                '''
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                        --format json \
+                        --output trivy-image-report.json \
+                        ${IMAGE_NAME}:latest
                 '''
             }
         }
@@ -33,6 +54,13 @@ pipeline {
                         ${IMAGE_NAME}:latest
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'trivy-*-report.json',
+                             allowEmptyArchive: true
         }
     }
 }
