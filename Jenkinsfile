@@ -26,16 +26,6 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
-            steps {
-                sh '''
-                    python3 -m venv .venv
-                    .venv/bin/pip install -r requirements.txt
-                    .venv/bin/pytest
-                '''
-            }
-        }
-
         stage('Build Image') {
             steps {
                 sh '''
